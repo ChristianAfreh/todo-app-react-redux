@@ -37,6 +37,26 @@ export const addTodoAsync = createAsyncThunk(
 	}
 );
 
+
+//update completed property of todo
+export const toggleCompleteAsync = createAsyncThunk(
+	'todos/completeTodoAsync',
+	async (payload) => {
+		const resp = await fetch(`http://localhost:7000/todos/${payload.id}`, {
+			method: 'PATCH',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ completed: payload.completed }),
+		});
+
+		if (resp.ok) {
+			const todo = await resp.json();
+			return { todo };
+		}
+	}
+);
+
 //1. a slice gives us a way to store a piece(or slice) of data
 //and gives us all things we need to change and retrieve that data
 export const todoSlice = createSlice({
@@ -72,9 +92,16 @@ export const todoSlice = createSlice({
         [getTodosAsync.fulfilled]: (state,action) => {
             return action.payload.todos;
         },
-        
+
         [addTodoAsync.fulfilled]: (state, action) => {
 			state.push(action.payload.todo);
+		},
+        
+        [toggleCompleteAsync.fulfilled]: (state, action) => {
+			const index = state.findIndex(
+				(todo) => todo.id === action.payload.todo.id
+			);
+			state[index].completed = action.payload.todo.completed;
 		},
     }
 });
