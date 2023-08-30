@@ -1,4 +1,21 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
+
+
+//1. import createAsyncThunk to create thunk(a func that returns another function)
+//2. this thunk is the new action which we dispatch from our components.
+//3. This will in turn dispatch its own action when the response completes, with the 
+// data from the response as the payload.
+export const getTodosAsync = createAsyncThunk(
+    'todos/getTodosAsync',
+    async () => {
+        const resp = await fetch('http://localhost:7000/todos');
+        if(resp.ok){
+            const todos = await resp.json();
+            return {todos};
+        }
+    }
+);
 
 
 //1. a slice gives us a way to store a piece(or slice) of data
@@ -31,6 +48,12 @@ export const todoSlice = createSlice({
             return state.filter((todo) => todo.id !== action.payload.id);
         }
     },
+
+    extraReducers: {
+        [getTodosAsync.fulfilled]: (state,action) => {
+            return action.payload.todos;
+        } 
+    }
 });
 
 export const {addTodo,toggleComplete,deleteTodo} = todoSlice.actions;
