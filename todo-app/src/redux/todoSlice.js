@@ -18,6 +18,25 @@ export const getTodosAsync = createAsyncThunk(
 );
 
 
+//Add a new todo item
+export const addTodoAsync = createAsyncThunk(
+	'todos/addTodoAsync',
+	async (payload) => {
+		const resp = await fetch('http://localhost:7000/todos', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ title: payload.title }),
+		});
+
+		if (resp.ok) {
+			const todo = await resp.json();
+			return { todo };
+		}
+	}
+);
+
 //1. a slice gives us a way to store a piece(or slice) of data
 //and gives us all things we need to change and retrieve that data
 export const todoSlice = createSlice({
@@ -52,7 +71,11 @@ export const todoSlice = createSlice({
     extraReducers: {
         [getTodosAsync.fulfilled]: (state,action) => {
             return action.payload.todos;
-        } 
+        },
+        
+        [addTodoAsync.fulfilled]: (state, action) => {
+			state.push(action.payload.todo);
+		},
     }
 });
 
