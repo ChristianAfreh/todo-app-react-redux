@@ -57,6 +57,21 @@ export const toggleCompleteAsync = createAsyncThunk(
 	}
 );
 
+//delete a todo item passing the id
+export const deleteTodoAsync = createAsyncThunk(
+    'todos/deleteTodoAsync',
+    async(payload) =>{
+        const resp = await fetch(`http://localhost:7000/todos/${payload.id}`,{
+            method: 'DELETE'
+        });
+
+        if(resp.ok){
+            return {id: payload.id};
+        }
+
+    }
+);
+
 //1. a slice gives us a way to store a piece(or slice) of data
 //and gives us all things we need to change and retrieve that data
 export const todoSlice = createSlice({
@@ -96,13 +111,17 @@ export const todoSlice = createSlice({
         [addTodoAsync.fulfilled]: (state, action) => {
 			state.push(action.payload.todo);
 		},
-        
+
         [toggleCompleteAsync.fulfilled]: (state, action) => {
 			const index = state.findIndex(
 				(todo) => todo.id === action.payload.todo.id
 			);
 			state[index].completed = action.payload.todo.completed;
 		},
+
+        [deleteTodoAsync.fulfilled]: (state,action) => {
+            return state.filter((todo) => todo.id !== action.payload.id);
+        }
     }
 });
 
